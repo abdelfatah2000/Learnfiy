@@ -1,0 +1,98 @@
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          description: The user's name.
+          required: true
+        email:
+          type: string
+          description: The user's email address.
+          format: email
+          required: true
+        password:
+          type: string
+          description: The user's password.
+          required: true
+        role:
+          type: string
+          enum: ['student', 'admin', 'instructor']
+          description: The user's role.
+    Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: The user's email address.
+          format: email
+          required: true
+        password:
+          type: string
+          description: The user's password.
+          required: true
+
+/api/auth/register:
+  post:
+    summary: Create a new user
+    tags: [Users]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+    responses:
+      '201':
+        description: User created successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      '400':
+        description: Bad request (e.g., missing required fields)
+
+/api/auth/verify-email/{userID}/{token}:
+  post:
+    summary: 'Verify user email'
+    tags: [Users]
+    parameters:
+      - in: path
+        name: userID
+        required: true
+        description: The ID of the user
+        type: string
+      - in: path
+        name: token
+        required: true
+        description: The token stored in database
+        type: string
+    responses:
+      200:
+        description: OK
+      400:
+        description: Bad Request
+
+/api/auth/login:
+  post:
+    summary: 'User login'
+    tags: [Users]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Login'
+    responses:
+      200:
+        description: User Login successfully
+      400:
+        description: Bad request (e.g., missing required fields)
