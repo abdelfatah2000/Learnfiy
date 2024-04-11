@@ -4,7 +4,7 @@ const { StatusCodes } = require('http-status-codes');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const jwtToken = require('../utils/token');
-const nanoid = require('nanoid')
+const nanoid = require('nanoid');
 const { limiterConsecutiveFailsByEmailAndIP } = require('../utils/rateLimiter');
 
 async function createToken(userID, email) {
@@ -32,7 +32,6 @@ exports.register = async (req, res) => {
   }
 
   const salt = nanoid();
-  console.log(salt.length)
   // Hash the password
   const hashed = hashPassword(payload.password, salt);
   const user = await new User({
@@ -44,7 +43,7 @@ exports.register = async (req, res) => {
 
   createToken(user._id, user.email);
 
-  console.log('User created successfully');
+  // console.log('User created successfully');
 
   return res.status(StatusCodes.CREATED).json({
     success: true,

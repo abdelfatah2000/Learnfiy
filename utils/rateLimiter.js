@@ -1,5 +1,7 @@
 const redis = require('redis');
 const { RateLimiterRedis } = require('rate-limiter-flexible');
+const logger = require('../config/logger');
+
 require('dotenv').config();
 
 const maxConsecutiveFailsByEmailAndIP = 10;
@@ -13,11 +15,11 @@ const redisClient = redis.createClient({
 redisClient.connect();
 
 redisClient.on('connect', () => {
-  console.log('Connected to Redis!');
+  logger.info('Connected to Redis!');
 });
 
 redisClient.on('error', (err) => {
-  console.error(err);
+  logger.error(err);
 });
 
 exports.limiterConsecutiveFailsByEmailAndIP = new RateLimiterRedis({

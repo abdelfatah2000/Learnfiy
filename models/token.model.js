@@ -30,11 +30,11 @@ const sendVerificationEmail = async (email, token, userID) => {
                 clicking this link :
                   <a href='http://localhost:${process.env.PORT}/auth/verify-email/${userID}/${token}'> Verfiy Email </a>`
   );
-  console.log('Email sent successfully: ', mail);
+  // console.log('Email sent successfully');
 };
 
 tokenSchema.pre('save', async function (next) {
-  console.log('Token created successfully');
+  // console.log('Token created successfully');
   sendVerificationEmail(this.email, this.token, this.userID);
   next();
 });
