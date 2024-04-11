@@ -8,19 +8,24 @@ const pathToKey = path.join(__dirname, '..', 'public.key');
 const Public_Key = fs.readFileSync(pathToKey, 'utf8');
 
 const options = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: Public_Key,
   algorithms: ['RS256'],
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 };
 
-exports.jwtStrategy = new JwtStrategy(options, (payload, done) => {
-  User.findById(payload.userID)
+const jwtStrategy = new JwtStrategy(options, (payload, done) => {
+  console.log('Verifying JWT payload...');
+  User.findById(payload.id)
     .then((user) => {
       if (user) {
-        return done(null, user);
+        return done(null, { id: user._id, role: user.role });
       } else {
         return done(null, false);
       }
     })
     .catch((err) => done(err, null));
 });
+
+module.exports = (passport) => {
+  passport.use(jwtStrategy);
+};

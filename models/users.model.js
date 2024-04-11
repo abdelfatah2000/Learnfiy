@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema(
       enum: ['admin', 'instructor', 'student'],
       default: 'student',
     },
+    salt: {
+      type: String,
+      required: true,
+    },
     lastLogin: {
       type: Date,
       default: Date.now(),

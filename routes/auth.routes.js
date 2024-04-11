@@ -1,7 +1,6 @@
 const authControllers = require('../controllers/auth.controllers');
 const express = require('express');
-const validator = require('../utils/validator');
-const passport = require('passport');
+const validator = require('../middlewares/validator');
 const {
   userValidationSchema,
   verifyEmailValidationSchema,

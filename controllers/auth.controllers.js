@@ -4,6 +4,7 @@ const { StatusCodes } = require('http-status-codes');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const jwtToken = require('../utils/token');
+const nanoid = require('nanoid')
 const { limiterConsecutiveFailsByEmailAndIP } = require('../utils/rateLimiter');
 
 async function createToken(userID, email) {
@@ -11,8 +12,8 @@ async function createToken(userID, email) {
   await Token.create({ userID, email, token });
 }
 
-function hashPassword(password) {
-  return bcrypt.hash(password, 10);
+function hashPassword(password, salt) {
+  return bcrypt.hashSync(password + salt);
 }
 
 function comparePassword(planPassword, hashedPassword) {
@@ -29,12 +30,16 @@ exports.register = async (req, res) => {
       result: null,
     });
   }
+
+  const salt = nanoid();
+  console.log(salt.length)
   // Hash the password
-  const hashed = await hashPassword(payload.password);
+  const hashed = hashPassword(payload.password, salt);
   const user = await new User({
     email: payload.email,
     password: hashed,
     name: payload.name,
+    salt,
   }).save();
 
   createToken(user._id, user.email);
