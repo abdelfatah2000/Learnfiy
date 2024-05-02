@@ -40,10 +40,65 @@ components:
           description: The user's email address.
           format: email
           required: true
+          default: ta7a@gmail.com
         password:
           type: string
           description: The user's password.
           required: true
+          default: 123456AmH
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+        message:
+          type: string
+        success:
+          type: boolean
+          default: false
+
+  responses:
+    DuplicateEmail:
+      description: Email already taken
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Email already taken
+            success: false
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Please authenticate
+            success: false
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: Forbidden
+            success: false
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Not found
+            success: false
 
 /api/auth/register:
   post:
@@ -63,7 +118,7 @@ components:
             schema:
               $ref: '#/components/schemas/User'
       '400':
-        description: Bad request (e.g., missing required fields)
+        $ref: '#/components/responses/DuplicateEmail'
 
 /api/auth/verify-email/{userID}/{token}:
   post:
@@ -82,9 +137,17 @@ components:
         type: string
     responses:
       200:
-        description: OK
-      400:
-        description: Bad Request
+        description: Email is verified
+      401:
+        description: verify email failed
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              code: 401
+              message: verify email failed.
+              success: false
 
 /api/auth/login:
   post:
@@ -98,13 +161,32 @@ components:
             $ref: '#/components/schemas/Login'
     responses:
       200:
-        description: User Login successfully
-      400:
-        description: Bad request (e.g., missing required fields)
+        schema:
+          $ref:
+      401:
+        description: Invalid email or password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              code: 401
+              message: Invalid email or password
+              success: false
 
-/api/admin/get-new-users:
+/api/admin/get-all-users:
   get:
-    summary: 'Get all user needs to accepted'
+    summary: 'Get all users'
+    tags: [Admin]
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: OK
+
+/api/admin/get-users-to-accept:
+  get:
+    summary: 'Get all users that needs accept from admin'
     tags: [Admin]
     security:
       - Bearer: []

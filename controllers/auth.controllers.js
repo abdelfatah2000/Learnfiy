@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const jwtToken = require('../utils/token');
 const nanoid = require('nanoid');
-const { limiterConsecutiveFailsByEmailAndIP } = require('../utils/rateLimiter');
+// const { limiterConsecutiveFailsByEmailAndIP } = require('../utils/rateLimiter');
 
 async function createToken(userID, email) {
   const token = crypto.randomBytes(20).toString('hex');
@@ -16,8 +16,8 @@ function hashPassword(password, salt) {
   return bcrypt.hashSync(password + salt);
 }
 
-function comparePassword(planPassword, hashedPassword) {
-  return bcrypt.compare(planPassword, hashedPassword);
+function comparePassword(planPassword, hashedPassword, salt) {
+  return bcrypt.compare(planPassword + salt, hashedPassword);
 }
 
 exports.register = async (req, res) => {
@@ -93,7 +93,7 @@ exports.login = async (req, res) => {
   const payload = req.body;
 
   const emailIPkey = `${payload.email}_${req.ip}`;
-  const resEmailAndIP = await limiterConsecutiveFailsByEmailAndIP.get(
+  /* const resEmailAndIP = await limiterConsecutiveFailsByEmailAndIP.get(
     emailIPkey
   );
   let nextAttempt = 0;
@@ -107,6 +107,7 @@ exports.login = async (req, res) => {
       message: `Too many requests. Retry after ${nextAttempt} seconds`,
     });
   }
+  */
   const user = await User.findOne({ email: payload.email });
   if (!user) {
     return res.status(StatusCodes.BAD_REQUEST).json({
@@ -128,7 +129,11 @@ exports.login = async (req, res) => {
       message: 'Admin must accept the account first',
     });
   }
-  const isMatched = await comparePassword(payload.password, user.password);
+  const isMatched = await comparePassword(
+    payload.password,
+    user.password,
+    user.salt
+  );
   if (isMatched) {
     const token = jwtToken(user);
     return res.status(StatusCodes.ACCEPTED).json({
@@ -140,7 +145,7 @@ exports.login = async (req, res) => {
     });
   }
   // if user failed to login 10 times in 1 hour , he will be blocked hour.
-  await limiterConsecutiveFailsByEmailAndIP.consume(emailIPkey);
+  // await limiterConsecutiveFailsByEmailAndIP.consume(emailIPkey);
 
   return res.status(StatusCodes.BAD_REQUEST).json({
     success: false,

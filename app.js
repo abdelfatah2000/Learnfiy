@@ -5,13 +5,11 @@ const swaggerUi = require('swagger-ui-express');
 const errorHandlers = require('./handlers/errorHandler');
 const passport = require('passport');
 const jwtStrategy = require('./config/passport');
-const { rateLimiterByIP } = require('./utils/rateLimiter');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const morgan = require('./config/morgan');
 const logger = require('./config/logger');
 const helmet = require('helmet');
-const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
 const cors = require('cors');
 
@@ -30,7 +28,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // sanitize request data
-app.use(xss());
 app.use(mongoSanitize());
 
 app.use(cors());

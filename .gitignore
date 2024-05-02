@@ -132,3 +132,5 @@ dist
 # JWT keys
 private.key
 public.key
+
+docker-compose.yml

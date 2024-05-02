@@ -20,6 +20,9 @@ redisClient.on('connect', () => {
 
 redisClient.on('error', (err) => {
   logger.error(err);
+
+    console.log('Redis error encountered', err);
+
 });
 
 exports.limiterConsecutiveFailsByEmailAndIP = new RateLimiterRedis({
