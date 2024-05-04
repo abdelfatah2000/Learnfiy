@@ -18,7 +18,7 @@ const jwtStrategy = new JwtStrategy(options, (payload, done) => {
   User.findById(payload.id)
     .then((user) => {
       if (user) {
-        return done(null, { id: user._id, role: user.role });
+        return done(null, { _id: user._id, role: user.role });
       } else {
         return done(null, false);
       }

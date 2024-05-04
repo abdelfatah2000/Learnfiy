@@ -1,5 +1,4 @@
 const passport = require('passport');
-const { hasPermission } = require('../utils/role');
 const adminControllers = require('../controllers/admin.controllers');
 const express = require('express');
 const auth = require('../middlewares/auth');
@@ -11,6 +10,16 @@ app.get(
   adminControllers.getAllNewUser
 );
 
-app.get('/get-users-to-accept', auth('getUsersToAccept'), adminControllers.getUserToAccept);
+app.get(
+  '/get-users-to-accept',
+  auth('getUsersToAccept'),
+  adminControllers.getUserToAccept
+);
+
+app.post(
+  '/accept-new-users',
+  auth('postAcceptNewUsers'),
+  adminControllers.postAcceptNewUsers
+);
 
 module.exports = app;

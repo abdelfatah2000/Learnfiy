@@ -1,3 +1,4 @@
+const Student = require('../models/student.model');
 const User = require('../models/users.model');
 const Token = require('../models/token.model');
 const { StatusCodes } = require('http-status-codes');
@@ -34,7 +35,7 @@ exports.register = async (req, res) => {
   const salt = nanoid();
   // Hash the password
   const hashed = hashPassword(payload.password, salt);
-  const user = await new User({
+  const user = await new Student({
     email: payload.email,
     password: hashed,
     name: payload.name,
@@ -64,7 +65,7 @@ exports.verfiyEmail = async (req, res) => {
   const userToken = await Token.findOne({ userID, token });
   if (userToken) {
     //Verify user
-    const user = await User.findByIdAndUpdate(
+    const user = await Student.findByIdAndUpdate(
       userID,
       { active: true },
       { new: true }
@@ -91,7 +92,6 @@ exports.verfiyEmail = async (req, res) => {
 
 exports.login = async (req, res) => {
   const payload = req.body;
-
   const emailIPkey = `${payload.email}_${req.ip}`;
   /* const resEmailAndIP = await limiterConsecutiveFailsByEmailAndIP.get(
     emailIPkey
@@ -136,6 +136,12 @@ exports.login = async (req, res) => {
   );
   if (isMatched) {
     const token = jwtToken(user);
+
+    //update last login
+
+    user.lastLogin = Date.now();
+    user.save();
+
     return res.status(StatusCodes.ACCEPTED).json({
       success: true,
       message: 'User login successfully',

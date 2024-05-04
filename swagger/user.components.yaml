@@ -29,6 +29,13 @@ components:
           type: string
           enum: ['student', 'admin', 'instructor']
           description: The user's role.
+    Instructor:
+      type: object
+      required:
+        - name
+        - email
+        - salary
+        
     Login:
       type: object
       required:
@@ -49,8 +56,6 @@ components:
     Error:
       type: object
       properties:
-        code:
-          type: number
         message:
           type: string
         success:
@@ -65,7 +70,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            code: 400
             message: Email already taken
             success: false
     Unauthorized:
@@ -75,7 +79,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            code: 401
             message: Please authenticate
             success: false
 
@@ -86,7 +89,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            code: 403
             message: Forbidden
             success: false
     NotFound:
@@ -96,7 +98,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            code: 404
             message: Not found
             success: false
 
@@ -145,7 +146,6 @@ components:
             schema:
               $ref: '#/components/schemas/Error'
             example:
-              code: 401
               message: verify email failed.
               success: false
 
@@ -162,15 +162,14 @@ components:
     responses:
       200:
         schema:
-          $ref:
-      401:
+          $ref: '#/components/schemas/User'
+      400:
         description: Invalid email or password
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
             example:
-              code: 401
               message: Invalid email or password
               success: false
 
@@ -180,9 +179,80 @@ components:
     tags: [Admin]
     security:
       - Bearer: []
+    parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          minimum: 1
+          default: 10
+          description: Maximum number of documents per page
+      - in: query
+        name: page
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Page number
+      - in: query
+        name: active
+        schema:
+          type: boolean
+        description: User verify account or not
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+            - admin
+            - student
+            - instructor
+      - in: query
+        name: fields
+        schema:
+          type: string
     responses:
       200:
         description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                results:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/User'
+                pagination:
+                  type: object
+                  properties:
+                    page:
+                      type: integer
+                      example: 1
+                    pages:
+                      type: integer
+                      example: 100
+                    count:
+                      type: integer
+                      example: 1000
+                message:
+                  type: string
+                  example: Successfully found all documents
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      403:
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 /api/admin/get-users-to-accept:
   get:
@@ -190,6 +260,90 @@ components:
     tags: [Admin]
     security:
       - Bearer: []
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integar
+          minimum: 1
+          default: 1
+          description: Page number
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          minimum: 10
+          default: 10
+          description: Maximum number of documents per page
+      - in: query
+        name: role
+        schema:
+          type: string
+          enum:
+            - student
+            - instructor
+      - in: query
+        name: active
+        schema:
+          type: boolean
     responses:
       200:
         description: OK
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                results:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/User'
+                pagination:
+                  type: object
+                  properties:
+                    page:
+                      type: integer
+                      example: 1
+                    pages:
+                      type: integer
+                      example: 100
+                    count:
+                      type: integer
+                      example: 1000
+                message:
+                  type: string
+                  example: Successfully found all documents
+      401:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      403:
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+/api/admin/accept-new-users:
+  post:
+    summary: Accept new user's
+    tags: [Admin]
+    security:
+      - Bearer: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              users:
+                type: array
+                items:
+                  id:
+                    type: string
